@@ -11,7 +11,6 @@ def algoritmo_goloso_monedas(cantidad_pesos):
     # Convertimos la cantidad solicitada a centavos
     cantidad_restante = int(round(cantidad_pesos * 100))
     
-    # Partimos de una solución vacía
     solucion = []
     
     # Iniciamos el ciclo mientras la cantidad no sea cero

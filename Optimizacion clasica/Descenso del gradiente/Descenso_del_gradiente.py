@@ -16,7 +16,7 @@ def Desc_Grad_Cauchy_2D(fun, inicio=(0, 0), tol=1e-4, max_iter=10, alpha_init=0.
         
         # si el gradiente es ~0, ya estamos en un punto crítico
         if (df_dx**2 + df_dy**2)**0.5 < tol:
-            print(f"Gradiente nulo. Punto crítico (probable mínimo) encontrado en {i} iteraciones.")
+            # print(f"Gradiente nulo. Punto crítico (probable mínimo) encontrado en {i} iteraciones.")
             return (x_n, y_n)
 
         # Función para evaluar el metodo
@@ -37,7 +37,7 @@ def Desc_Grad_Cauchy_2D(fun, inicio=(0, 0), tol=1e-4, max_iter=10, alpha_init=0.
             if abs(g_double_prime) < 1e-8:
                 break # Evitar división por cero si la pendiente se vuelve plana
                 
-            # Fórmula de actualización de Newton-Raphson
+            # Actualizamos alpha 
             alpha_opt = alpha_opt - (g_prime / g_double_prime)
 
         # ACTUALIZAR EL PUNTO CON EL ALPHA ÓPTIMO
@@ -46,7 +46,7 @@ def Desc_Grad_Cauchy_2D(fun, inicio=(0, 0), tol=1e-4, max_iter=10, alpha_init=0.
         
         print(f"Iteración {i+1}: λ = {alpha_opt:.4f} -> x = {x_next:.4f}, y = {y_next:.4f}")
 
-        # Paro cuando se llegue al mínimo
+        # Nos detenemos cuando se llegue al mínimo
         distancia = ((x_next - x_n)**2 + (y_next - y_n)**2)**0.5
         if distancia < tol:
             print(f"Mínimo encontrado en {i+1} iteraciones.")
