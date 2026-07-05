@@ -1,0 +1,471 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{tikz} % Paquete necesario para los diagramas
+\usetikzlibrary{babel, shapes.geometric, arrows}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{Notas Completas: Árboles, Computación Evolutiva y Optimización}
+\author{}
+\date{}
+
+\begin{document}
+	\maketitle
+	\tableofcontents
+	\newpage
+	
+	\section{Estructura de Datos: Árboles}
+	
+	\subsection{Definición y Conceptos Básicos}
+	Los árboles son estructuras de datos no lineales fundamentales en ciencias de la computación. Sirven para representar información jerárquica, direcciones o etiquetas de una manera organizada.
+	
+	\textbf{Definición formal recursiva:} Un árbol es un conjunto finito de uno o más nodos donde existe un nodo especial llamado \textbf{raíz}. Los nodos restantes se dividen en $m \ge 0$ conjuntos disjuntos $T_{1}, \dots, T_{m}$, donde cada uno de estos conjuntos es a su vez un árbol (llamados subárboles de la raíz). Cualquier nodo es la raíz de un subárbol que consiste en él y los nodos por debajo de él.
+	
+	\textbf{Ejemplos en la vida cotidiana:}
+	\begin{itemize}
+		\item La organización de una empresa (organigrama).
+		\item El árbol genealógico de una persona.
+		\item La organización de torneos deportivos (tabla de partidos).
+	\end{itemize}
+	
+	\textbf{Aplicaciones computacionales principales:}
+	\begin{itemize}
+		\item Realización de ordenaciones y búsquedas de datos.
+		\item Asignación de bloques de memoria de tamaño variable.
+		\item Organización de tablas de símbolos en compiladores.
+		\item Representación de tablas de decisión.
+		\item Solución de juegos y prueba de teoremas.
+	\end{itemize}
+	
+	\subsection{Terminología de Árboles}
+	Para entender y manipular árboles, es vital conocer su anatomía básica:
+	\begin{itemize}
+		\item \textbf{Nodo o Vértice:} Elemento del árbol que puede tener un nombre e información asociada.
+		\item \textbf{Raíz:} El primer nodo de un árbol. Su profundidad siempre es 0.
+		\item \textbf{Arcos o Ramas:} Las flechas o líneas que conectan un nodo con otro.
+		\item \textbf{Hojas (Nodos Terminales):} Nodos que no tienen hijos (no conducen a ningún otro nodo).
+		\item \textbf{Nodos Internos (No Terminales):} Cualquier nodo que no sea una hoja.
+		\item \textbf{Relación Padre-Hijo:} Si un nodo $n_{1}$ tiene una rama hacia $n_{2}$, se dice que $n_{2}$ es hijo de $n_{1}$.
+		\item \textbf{Camino:} Una lista de ramas contiguas que van de un nodo a otro.
+		\item \textbf{Nivel de un Nodo:} La longitud del camino que lo conecta al nodo raíz.
+		\item \textbf{Altura de un Nodo:} El máximo largo de camino desde ese nodo hasta alguna hoja.
+		\item \textbf{Bosque:} Un conjunto de árboles.
+	\end{itemize}
+	
+	\subsection{Árboles Binarios (AB)}
+	Un árbol binario es aquel en el que ningún nodo puede tener más de dos subárboles (puede tener cero, uno o dos hijos: izquierdo y derecho).
+	
+	\begin{itemize}
+		\item \textbf{Árbol Equilibrado:} Se determina mediante su Factor de Equilibrio (FE), que es la diferencia entre la altura del subárbol derecho y el izquierdo:
+		$$FE = h_{SD} - h_{SI}$$
+		\item \textbf{Árbol Binario Completo:} Un árbol de profundidad $N$ donde cada nivel (del 0 al $N-1$) tiene su conjunto de nodos completamente lleno.
+		\item \textbf{Profundidad:} La fórmula para obtener la profundidad de un árbol completo a partir de su número de nodos ($n$) es:
+		$$h = \lfloor \log_{2}n \rfloor + 1$$
+	\end{itemize}
+	
+	\textbf{Representación ligada en C:}
+	\begin{verbatim}
+		typedef struct _nodo {
+			int info;
+			struct _nodo *izq;
+			struct _nodo *der;
+		} tiponodo;
+		typedef tiponodo *Arbol;
+	\end{verbatim}
+	
+	\vspace{0.5cm}
+	\textbf{Diagrama de un Árbol Binario:}
+	\begin{center}
+		\begin{tikzpicture}[level distance=1.5cm,
+			level 1/.style={sibling distance=4cm},
+			level 2/.style={sibling distance=2cm},
+			every node/.style={circle, draw, minimum size=1cm, align=center}]
+			
+			\node {Raíz\\(Nivel 0)}
+			child {node {Hijo\\Izq}
+				child {node {Hoja}}
+				child {node {Hoja}}
+			}
+			child {node {Hijo\\Der}
+				child {node {Hoja}}
+				child {node {Hoja}}
+			};
+		\end{tikzpicture}
+	\end{center}
+	
+	\subsection{Recorridos en Árboles Binarios}
+	\begin{itemize}
+		\item \textbf{Preorden:} Visitar la raíz $\rightarrow$ Recorrer subárbol izquierdo $\rightarrow$ Recorrer subárbol derecho.
+		\item \textbf{Inorden:} Recorrer subárbol izquierdo $\rightarrow$ Visitar la raíz $\rightarrow$ Recorrer subárbol derecho.
+		\item \textbf{Postorden:} Recorrer subárbol izquierdo $\rightarrow$ Recorrer subárbol derecho $\rightarrow$ Visitar la raíz.
+	\end{itemize}
+	
+	\subsection{Árboles Binarios de Búsqueda (BST)}
+	Un conjunto de nodos $T$ es un árbol binario de búsqueda si es vacío, o si para cada nodo $n$:
+	\begin{enumerate}
+		\item La llave de búsqueda de $n$ es mayor que todas las llaves de su subárbol izquierdo ($T_{I}$).
+		\item La llave de búsqueda de $n$ es menor que todas las llaves de su subárbol derecho ($T_{D}$).
+		\item Ambos $T_{I}$ y $T_{D}$ son también árboles binarios de búsqueda.
+	\end{enumerate}
+	
+	\subsection{Operaciones Básicas en un BST}
+	Para que un Árbol Binario de Búsqueda (BST) sea útil, debe soportar tres operaciones fundamentales. La eficiencia de estas operaciones es de $O(\log n)$ en promedio, pero puede degradarse a $O(n)$ si el árbol está desbalanceado (semejante a una lista ligada).
+	
+	\begin{itemize}
+		\item \textbf{Búsqueda:} Se compara el valor buscado con la raíz. Si es igual, la búsqueda termina. Si es menor, se busca recursivamente en el subárbol izquierdo; si es mayor, en el subárbol derecho.
+		\item \textbf{Inserción:} Se realiza una búsqueda hasta llegar a una hoja (un puntero nulo). El nuevo nodo se inserta en esa posición, respetando la regla de orden del BST.
+		\item \textbf{Eliminación (El caso más complejo):} Tiene tres escenarios posibles:
+		\begin{enumerate}
+			\item \textbf{El nodo a eliminar es una hoja:} Simplemente se borra y se actualiza el puntero de su padre a nulo.
+			\item \textbf{El nodo tiene un solo hijo:} Se elimina el nodo y se reemplaza por su único hijo (el abuelo "adopta" al nieto).
+			\item \textbf{El nodo tiene dos hijos:} Se busca su \textit{sucesor inorden} (el nodo más pequeño del subárbol derecho) o su \textit{predecesor inorden} (el nodo más grande del subárbol izquierdo). Se copia el valor de este sucesor al nodo que queremos eliminar, y luego se elimina el sucesor original.
+		\end{enumerate}
+	\end{itemize}
+	
+	\subsection{Árboles Auto-balanceables: Árboles AVL}
+	Para evitar el peor caso de rendimiento $O(n)$ en un BST, se desarrollaron los árboles auto-balanceables. El primer modelo propuesto fue el \textbf{Árbol AVL} (por sus inventores Adelson-Velsky y Landis).
+	
+	Un árbol es AVL si, para cada nodo, la diferencia de alturas entre su subárbol derecho y su subárbol izquierdo (el Factor de Equilibrio, FE) es exactamente $-1$, $0$ o $1$.
+	$$FE = h_{SD} - h_{SI} \in \{-1, 0, 1\}$$
+	
+	\textbf{Rotaciones:} Cuando se inserta o elimina un nodo y un subárbol rompe la regla del FE (por ejemplo, el FE se vuelve $2$ o $-2$), el árbol debe reestructurarse mediante \textit{rotaciones} para restaurar el balance:
+	\begin{itemize}
+		\item \textbf{Rotación Simple a la Derecha (LL):} Se aplica cuando el desequilibrio ocurre por insertar un nodo en el subárbol izquierdo del hijo izquierdo.
+		\item \textbf{Rotación Simple a la Izquierda (RR):} Se aplica cuando el desequilibrio ocurre en el subárbol derecho del hijo derecho.
+		\item \textbf{Rotaciones Dobles (LR y RL):} Combinaciones de las anteriores cuando el desequilibrio ocurre en posiciones internas (en zigzag).
+	\end{itemize}
+	
+	\vspace{0.5cm}
+	\textbf{Diagrama de Rotación Simple a la Derecha:}
+	\begin{center}
+		\begin{tikzpicture}[level distance=1.2cm,
+			level 1/.style={sibling distance=3cm},
+			level 2/.style={sibling distance=1.5cm},
+			every node/.style={circle, draw, minimum size=0.8cm, align=center}]
+			
+			% Árbol desbalanceado
+			\node at (0,0) {Z}
+			child {node {Y}
+				child {node {X}}
+				child[missing]
+			}
+			child[missing];
+			
+			\node[draw=none] at (0, 1) {\textbf{Desbalanceado}};
+			
+			% Flecha indicando rotación
+			\draw[->, thick, black] (2, -1) -- (4, -1) node[midway, above, draw=none] {Rotación};
+			
+			% Árbol balanceado
+			\node at (6,-0.5) {Y}
+			child {node {X}}
+			child {node {Z}};
+			
+			\node[draw=none] at (6, 1) {\textbf{Balanceado (AVL)}};
+			
+		\end{tikzpicture}
+	\end{center}
+	
+	\subsection{Montículos (Heaps)}
+	Un montículo es una estructura de datos basada en árboles binarios que satisface dos propiedades fundamentales:
+	\begin{enumerate}
+		\item \textbf{Propiedad de forma:} Es un árbol binario completo en todos sus niveles, excepto posiblemente el último, el cual se llena de izquierda a derecha.
+		\item \textbf{Propiedad de orden:} Dependiendo del tipo de montículo, la relación entre padres e hijos está estrictamente definida.
+	\end{enumerate}
+	
+	\textbf{Tipos de Heaps:}
+	\begin{itemize}
+		\item \textbf{Min-Heap:} El valor de cada nodo padre es menor o igual al valor de sus hijos. La raíz siempre contiene el elemento más pequeño.
+		\item \textbf{Max-Heap:} El valor de cada nodo padre es mayor o igual al valor de sus hijos. La raíz siempre contiene el elemento más grande.
+	\end{itemize}
+	
+	Los montículos son la base para algoritmos de ordenamiento muy eficientes como el \textbf{Heapsort} ($O(n \log n)$) y son la estructura de datos ideal para implementar \textbf{Colas de Prioridad}, utilizadas frecuentemente en algoritmos de grafos (como Dijkstra) y planificación de procesos del sistema operativo.
+	
+	
+	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%
+	
+	\section{Computación Evolutiva}
+	
+	\subsection{Teoría de Esquemas y Paralelismo Implícito}
+	Los algoritmos genéticos (AG) funcionan descubriendo y enfatizando ``bloques constructores'' de soluciones de forma altamente paralela. 
+	
+	Cualquier cadena de bits de longitud $L$ pertenece a $2^{L}$ esquemas diferentes. Un esquema es un patrón de similitud que describe a un conjunto de individuos usando el alfabeto $\{0, 1, *\}$. 
+	
+	El \textbf{paralelismo implícito} ocurre porque, mientras el algoritmo evalúa las aptitudes de $N$ cadenas en la población en una generación, está estimando simultáneamente las aptitudes de un número muchísimo mayor de esquemas.
+	
+	\begin{itemize}
+		\item \textbf{Orden de esquema $O(H)$:} Número fijo de alelos (ceros o unos) presentes en el patrón.
+		\item \textbf{Longitud $d(H)$:} Distancia física entre el primer y el último elemento fijo del esquema.
+	\end{itemize}
+	
+	La población esperada de un esquema $H$ en la siguiente generación ($t+1$) se calcula como:
+	$$m(H,t+1) = m(H,t) \times \frac{f(H)}{\hat{f}}$$
+	Donde $\hat{f}$ es el promedio de aptitud de la población.
+	
+	\textbf{Efecto de la Cruza y Mutación en los Esquemas:}
+	\begin{itemize}
+		\item \textbf{Probabilidad de destrucción por cruza:} $$P_{\text{destrucción}}(H) = \frac{d(H)}{l-1}$$
+		\item \textbf{Probabilidad de supervivencia a la mutación:} $$(1-P_{m})^{O(H)}$$
+	\end{itemize}
+	
+	\subsection{Técnicas de Codificación}
+	John Holland determinó que la \textbf{codificación binaria} (usando el alfabeto $\{0,1\}$) era la más conveniente teóricamente.
+	
+	\textbf{Decodificación a variables reales:}
+	Para convertir una subcadena binaria a un valor numérico real en un rango, se utiliza:
+	$$x_{i} = u_{i} + \frac{v_{i}-u_{i}}{2^{l_{i}}-1} \left( \sum_{j=0}^{l_{i}-1} a_{j} 2^{j} \right)$$
+	
+	\begin{itemize}
+		\item \textbf{Código Gray:} La codificación binaria normal a menudo no mapea bien el espacio de búsqueda debido al ``risco de Hamming''. El código Gray soluciona esto aplicando operaciones XOR a los bits consecutivos.
+		\item \textbf{Codificación Desordenada (Linkage problem):} Para evitar que la cruza destruya bloques constructores que están muy separados en la cadena, se almacena de forma conjunta la posición del gen y su valor.
+	\end{itemize}
+	
+	\subsection{Programación Genética (Codificación de Árbol)}
+	Este enfoque, establecido por John Koza, evoluciona programas de computadora representados como árboles en lugar de cadenas de bits.
+	
+	\textbf{Componentes del árbol:}
+	\begin{enumerate}
+		\item \textbf{Nodos internos (Funciones):} Operadores aritméticos ($+,-,*,/$), funciones matemáticas ($\sin, \exp, \ln$), operadores booleanos (AND, OR, NOT), condicionales (If-Then-Else), ciclos y funciones recursivas.
+		\item \textbf{Terminales (Hojas):} Variables del problema o constantes numéricas.
+	\end{enumerate}
+	
+	\textbf{Operaciones Genéticas en Árboles:}
+	\begin{itemize}
+		\item \textbf{Cruza:} Se seleccionan puntos de cruza al azar en dos árboles padres y se intercambian los subárboles completos a partir de esos puntos.
+		\item \textbf{Mutación:} Se selecciona un punto al azar en el árbol y se reemplaza todo el subárbol debajo de él con un nuevo subárbol generado aleatoriamente.
+	\end{itemize}
+	
+	\vspace{0.5cm}
+	\textbf{Diagrama de Cruza en Programación Genética:}
+	\begin{center}
+		\begin{tikzpicture}[level distance=1.2cm, sibling distance=2cm,
+			every node/.style={circle, draw, minimum size=0.8cm, fill=white}]
+			
+			% Padre 1
+			\node at (0,0) {$+$}
+			child {node {$X$}}
+			child {node[fill=blue!20] (c1) {$*$}
+				child {node {$Y$}}
+				child {node {$2$}}
+			};
+			\node[draw=none, fill=none] at (0, 1.5) {\textbf{Padre 1}};
+			
+			% Padre 2
+			\node at (6,0) {$-$}
+			child {node[fill=red!20] (c2) {$/$}
+				child {node {$X$}}
+				child {node {$Y$}}
+			}
+			child {node {$5$}};
+			\node[draw=none, fill=none] at (6, 1.5) {\textbf{Padre 2}};
+			
+			% Flecha indicando el intercambio (Cruza)
+			\draw[<->, dashed, thick, black] (c1) -- (c2) node[midway, above, draw=none, fill=none] {Intercambio};
+			
+		\end{tikzpicture}
+	\end{center}
+	
+		%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%	%%%%
+	
+	
+	\subsection{El Algoritmo Genético Clásico}
+	
+	\textbf{Función Objetivo vs. Función de Aptitud (Fitness):}
+	Es vital distinguir entre ambas. La \textbf{función objetivo} es la ecuación matemática pura que describe el problema (puede ser minimizar costos o maximizar ganancias, y puede tener valores negativos). La \textbf{función de aptitud} ($f$) transforma esa función objetivo en una medida de ``supervivencia'' o desempeño, la cual típicamente debe ser estrictamente positiva para ser evaluada correctamente por el algoritmo.
+	
+	\textbf{Pseudocódigo del Algoritmo Genético:}
+	El proceso iterativo básico de un algoritmo genético sigue esta estructura:
+	\begin{verbatim}
+		1. INICIALIZAR población P(t=0) de tamaño N aleatoriamente.
+		2. EVALUAR la aptitud f(x) de cada individuo en P(t).
+		3. MIENTRAS (no se cumpla criterio de paro) HACER:
+		a. SELECCIONAR padres de P(t) basados en su aptitud.
+		b. CRUZAR padres para generar descendencia.
+		c. MUTAR la descendencia con una probabilidad Pm.
+		d. EVALUAR la aptitud de los nuevos individuos.
+		e. REEMPLAZAR la población P(t) para formar P(t+1).
+		f. t = t + 1
+		4. FIN MIENTRAS
+		5. RETORNAR el mejor individuo encontrado.
+	\end{verbatim}
+	
+	\vspace{0.5cm}
+	\textbf{Diagrama de Flujo del Algoritmo Genético:}
+	\begin{center}
+		\begin{tikzpicture}[node distance=1.8cm]
+		\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!20]
+		\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=orange!20]
+		\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!20, aspect=2]
+		\tikzstyle{arrow} = [thick,->,>=stealth]
+		
+		
+			\node (start) [startstop] {Inicializar Población};
+			\node (eval) [process, below of=start] {Evaluar Aptitud (Fitness)};
+			\node (decide) [decision, below of=eval, yshift=-0.5cm] {¿Criterio de Paro?};
+			\node (stop) [startstop, right of=decide, xshift=3cm] {Fin (Mejor Solución)};
+			
+			\node (select) [process, below of=decide, yshift=-0.5cm] {Selección};
+			\node (cross) [process, below of=select] {Cruza};
+			\node (mutate) [process, below of=cross] {Mutación};
+			\node (replace) [process, below of=mutate] {Reemplazo de Población};
+			
+			\draw [arrow] (start) -- (eval);
+			\draw [arrow] (eval) -- (decide);
+			\draw [arrow] (decide) -- node[anchor=south] {Sí} (stop);
+			\draw [arrow] (decide) -- node[anchor=east] {No} (select);
+			\draw [arrow] (select) -- (cross);
+			\draw [arrow] (cross) -- (mutate);
+			\draw [arrow] (mutate) -- (replace);
+			
+			% Flecha de retorno al ciclo
+			\draw [arrow] (replace.west) -- ++(-1.5,0) |- (eval.west);
+		\end{tikzpicture}
+	\end{center}
+	
+	\subsection{Métodos de Selección y Criterios de Paro}
+	
+	La fase de selección determina cuáles individuos sobrevivirán y se reproducirán. Se debe mantener una presión selectiva adecuada: mucha presión lleva a convergencia prematura (estancamiento en un mínimo local), y muy poca presión hace que el algoritmo se comporte como una búsqueda aleatoria.
+	
+	\textbf{Principales Métodos de Selección:}
+	\begin{itemize}
+		\item \textbf{Ruleta (Proporcional a la aptitud):} A cada individuo se le asigna un segmento de una "ruleta" cuyo tamaño es proporcional a su valor de aptitud. Los mejores individuos tienen más probabilidades de ser seleccionados. La probabilidad de seleccionar al individuo $i$ es: 
+		$$P_i = \frac{f_i}{\sum_{j=1}^{N} f_j}$$
+		\item \textbf{Torneo:} Se seleccionan $k$ individuos al azar de la población y compiten entre sí. El que tenga la mejor aptitud gana y es seleccionado. Es muy popular porque es eficiente y no requiere escalar la función de aptitud.
+		\item \textbf{Jerarquía (Ranking):} Se ordena a la población de peor a mejor según su aptitud. La probabilidad de selección se asigna según la posición (rango) en la lista, no por el valor exacto de la aptitud. Esto evita que un individuo "súper apto" domine la población rápidamente en las primeras generaciones.
+	\end{itemize}
+	
+	\textbf{Criterios de Paro Comunes:}
+	El algoritmo debe detenerse en algún momento. Las condiciones típicas son:
+	\begin{enumerate}
+		\item \textbf{Número máximo de generaciones:} Se alcanza un límite de iteraciones ($T_{max}$).
+		\item \textbf{Convergencia de la población:} Cuando la mayoría de los individuos en la población son idénticos o muy similares, lo que significa que el algoritmo ya no está explorando soluciones nuevas.
+		\item \textbf{Umbral de aptitud (Fitness threshold):} Cuando se encuentra una solución cuya aptitud es igual o mejor que un valor meta predefinido.
+	\end{enumerate}
+	
+	\section{Técnicas Clásicas de Optimización}
+	
+	\subsection{Introducción}
+	La optimización consiste simplemente en encontrar la mejor solución posible entre las alternativas disponibles dadas unas circunstancias específicas. Todo problema de optimización consta de tres componentes principales:
+	\begin{enumerate}
+		\item Una función objetivo a maximizar o minimizar.
+		\item Variables independientes.
+		\item Restricciones del problema.
+	\end{enumerate}
+	Las técnicas clásicas asumen que la función objetivo es continua, tiene derivadas continuas y es dos veces diferenciable.
+	
+	\subsection{Condiciones Necesarias y Suficientes}
+	Para garantizar que un punto encontrado es un óptimo, se basan en teoremas de cálculo:
+	
+	\textbf{Funciones de una variable $f(x)$:}
+	\begin{itemize}
+		\item \textbf{Condición Necesaria:} Si la función tiene un mínimo local en $x=x^{*}$, entonces la primera derivada es cero: $f'(x)=0$.
+		\item \textbf{Condición Suficiente:} Si $f'(x^{*}) = \dots = f^{(n-1)}(x^{*}) = 0$ pero la n-ésima derivada $f^{(n)}(x^{*}) \neq 0$:
+		\begin{itemize}
+			\item Si $f^{(n)}(x^{*}) > 0$ y $n$ es par, es un \textbf{mínimo}.
+			\item Si $f^{(n)}(x^{*}) < 0$ y $n$ es par, es un \textbf{máximo}.
+		\end{itemize}
+	\end{itemize}
+	
+	\textbf{Funciones multivariables $f(X)$:}
+	\begin{itemize}
+		\item \textbf{Condición Necesaria:} El gradiente en el punto óptimo debe ser cero: $\nabla f(X^{*}) = 0$.
+		\item \textbf{Condición Suficiente:} Evaluando la Matriz Hessiana en $X^{*}$:
+		\begin{itemize}
+			\item Si es definida positiva, el punto es un mínimo relativo.
+			\item Si es definida negativa, el punto es un máximo relativo.
+			\item Si no es ninguna de las dos, se trata de un punto de silla.
+		\end{itemize}
+	\end{itemize}
+	
+	\subsection{Técnicas Numéricas Basadas en Gradiente}
+	\begin{itemize}
+		\item \textbf{Descenso Más Pronunciado (Steepest Descent):} Introducida por Cauchy. Comienza en un punto inicial y elige como dirección de búsqueda el gradiente negativo: 
+		$$S_{i} = -\nabla f(X_{i})$$ 
+		Luego, busca el tamaño de paso óptimo $\lambda_{i}^{*}$ que minimice la función en esa dirección: $f(X_{i} + \lambda_{i}^{*} S_{i})$.
+		
+		\item \textbf{Método de Newton:} Utiliza tanto la primera como la segunda derivada para determinar la dirección de búsqueda:
+		$$S_{i} = -H_{i}^{-1} \nabla f_{i}$$
+		Converge muy rápido para funciones cuadráticas, pero requiere calcular la inversa de la Matriz Hessiana ($H_{i}^{-1}$).
+	\end{itemize}
+	
+	\subsection{Técnicas de Eliminación}
+	Se utilizan generalmente para funciones unidimensionales que son discontinuas o no diferenciables (funciones unimodales).
+	
+	\begin{itemize}
+		\item \textbf{Método de Eliminación de Fibonacci:} Utiliza la secuencia de Fibonacci para seleccionar puntos de prueba estratégicos e ir reduciendo el intervalo de incertidumbre:
+		$$L_{2}^{*} = \frac{F_{n-2}}{F_{n}} L_{0}$$
+		
+		\item \textbf{Método de la Sección Dorada:} Inspirado en la proporción áurea ($\gamma \approx 1.618$). Es similar al de Fibonacci, pero utiliza un factor de reducción constante:
+		$$L_{2}^{*} = \frac{L_{0}}{\gamma^{2}} = 0.382 L_{0}$$
+	\end{itemize}
+	
+	\subsection{Convexidad}
+	Un concepto vital en la teoría de optimización es la convexidad. La principal ventaja de una función convexa es que \textbf{cualquier mínimo local es también un mínimo global}, lo que garantiza que las técnicas basadas en gradiente encuentren la solución óptima absoluta sin quedarse atrapadas.
+	
+	\textbf{Definición matemática:} Una función $f(x)$ es convexa si, para cualesquiera dos puntos $x, y$ en su dominio y cualquier factor $t \in [0,1]$, el segmento de recta que une esos puntos siempre se mantiene por encima o sobre la curva de la función:
+	$$f(tx + (1-t)y) \le t f(x) + (1-t)f(y)$$
+	
+	\vspace{0.5cm}
+	\textbf{Diagrama de Convexidad:}
+	\begin{center}
+		\begin{tikzpicture}[scale=0.8]
+			% Ejes Función Convexa
+			\draw[->] (-0.5,0) -- (4,0) node[right] {$x$};
+			\draw[->] (0,-0.5) -- (0,3) node[above] {$f(x)$};
+			
+			% Función convexa (parábola)
+			\draw[thick, blue, domain=0.5:3.5, samples=50] plot (\x, {0.5*(\x-2)^2 + 0.5});
+			
+			% Secante
+			\draw[dashed, red, thick] (1, 1) -- (3, 1);
+			\filldraw[black] (1, 1) circle (2pt) node[anchor=south east] {$x$};
+			\filldraw[black] (3, 1) circle (2pt) node[anchor=south west] {$y$};
+			\node[draw=none] at (1.75, 2.5) {\textbf{Función Convexa}};
+			
+			% Ejes Función No Convexa (Derecha)
+			\begin{scope}[xshift=6cm]
+				\draw[->] (-0.5,0) -- (4,0) node[right] {$x$};
+				\draw[->] (0,-0.5) -- (0,3) node[above] {$f(x)$};
+				
+				% Función no convexa (cúbica/senoide)
+				\draw[thick, blue, domain=0.5:3.5, samples=50] plot (\x, {sin(\x r * 2.5)*0.8 + 1.5});
+				
+				% Secante
+				\draw[dashed, red, thick] (0.8, 2.22) -- (3.2, 2.29);
+				\filldraw[black] (0.8, 2.22) circle (2pt);
+				\filldraw[black] (3.2, 2.29) circle (2pt);
+				\node[draw=none] at (2, 3.2) {\textbf{No Convexa (Mínimos locales)}};
+			\end{scope}
+		\end{tikzpicture}
+	\end{center}
+	
+	\subsection{Optimización con Restricciones}
+	Los problemas del mundo real raramente son irrestrictos; generalmente están limitados por recursos, leyes de la física o presupuestos. Las técnicas clásicas requieren adaptaciones mayores para resolverlos.
+	
+	\textbf{1. Multiplicadores de Lagrange (Restricciones de Igualdad):}
+	Se utilizan cuando el problema tiene la forma: 
+	Minimizar $f(x)$ sujeto a $h_i(x) = 0$.
+	
+	Se construye una nueva función combinada llamada \textbf{Función Lagrangiana}, agregando variables artificiales $\lambda_i$ (los multiplicadores):
+	$$\mathcal{L}(x, \lambda) = f(x) + \sum_{i=1}^{m} \lambda_i h_i(x)$$
+	El óptimo se encuentra resolviendo $\nabla \mathcal{L}(x, \lambda) = 0$, lo que implica que en el punto óptimo, el gradiente de la función objetivo es paralelo al gradiente de la restricción.
+	
+	\textbf{2. Condiciones KKT (Restricciones de Desigualdad):}
+	Nombradas por Karush, Kuhn y Tucker, son una generalización de los multiplicadores de Lagrange para problemas del tipo:
+	Minimizar $f(x)$ sujeto a $g_j(x) \le 0$ y $h_i(x) = 0$.
+	
+	Para que un punto $x^*$ sea un óptimo garantizado (asumiendo que las funciones son diferenciables), debe satisfacer estrictamente las siguientes condiciones KKT:
+	\begin{itemize}
+		\item \textbf{Estacionariedad:} El gradiente del Lagrangiano generalizado debe ser cero: \\ $\nabla f(x^*) + \sum \mu_j \nabla g_j(x^*) + \sum \lambda_i \nabla h_i(x^*) = 0$
+		\item \textbf{Factibilidad primal:} El punto no debe violar ninguna restricción original del problema: $g_j(x^*) \le 0$ y $h_i(x^*) = 0$.
+		\item \textbf{Factibilidad dual:} Los multiplicadores asociados a las desigualdades deben ser positivos: $\mu_j \ge 0$.
+		\item \textbf{Holgura complementaria:} $\mu_j g_j(x^*) = 0$. Esto significa que si una restricción de desigualdad no está tocando su límite (es decir, $g_j(x^*) < 0$), entonces su multiplicador $\mu_j$ forzosamente debe ser $0$.
+	\end{itemize}
+	
+	
+	
+\end{document}
