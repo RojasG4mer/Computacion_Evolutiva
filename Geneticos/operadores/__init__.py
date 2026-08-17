@@ -1,33 +1,25 @@
-# 1. Importamos las funciones desde los archivos individuales
-from .seleccion import ruleta, torneo
-from .cruza import un_punto, uniforme
-from .aptitud import funcion_polinomial, funcion_cauchy, funcion_lineal
-from .muta import mutacion_un_bit, mutacion_multiple
-from .codificacion import decodificar_binario, decodificar_gray
+# Actualiza las importaciones en la parte superior:
+from .seleccion import ruleta, torneo, torneo_umbral, seleccion_rango, seleccion_boltzmann, muestreo_deterministico
+from .cruza import un_punto, uniforme, cruza_n_puntos, cruza_uniforme_prob, cruza_aritmetica_real, cruza_geometrica_real
+from .escalamiento import minimizacion_fmax_conocido, minimizacion_fmin_inverso, escalamiento_lineal # <--- Nuevo archivo
 
-# 2. Creamos los diccionarios (Fábricas) para acceder a las funciones
+# Agrega los nuevos métodos a los diccionarios existentes:
 SELECCION = {
     "ruleta": ruleta,
-    "torneo": torneo
+    "torneo": torneo,
+    "torneo_umbral": torneo_umbral,
+    "rango": seleccion_rango,
+    "boltzmann": seleccion_boltzmann,
+    "deterministico": muestreo_deterministico
 }
 
 CRUZA = {
     "un_punto": un_punto,
-    "uniforme": uniforme
+    "uniforme": uniforme,
+    "n_puntos": cruza_n_puntos,
+    "uniforme_prob": cruza_uniforme_prob,
+    "aritmetica_real": cruza_aritmetica_real,
+    "geometrica_real": cruza_geometrica_real
 }
 
-APTITUD = {
-    "polinomial": funcion_polinomial,
-    "cauchy": funcion_cauchy,
-    "lineal": funcion_lineal
-}
-
-MUTACION = {
-    "un_bit": mutacion_un_bit,
-    "multiple": mutacion_multiple
-}
-
-CODIFICACION = {
-    "binario": decodificar_binario,
-    "gray": decodificar_gray
-}
+# (APTITUD, MUTACION Y CODIFICACION quedan igual)
