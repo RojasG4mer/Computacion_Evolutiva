@@ -2,9 +2,6 @@ import math
 import random
 import numpy as np
 
-# ==========================================
-# MÉTODOS ORIGINALES
-# ==========================================
 def ruleta(datos_poblacion, num_seleccionados):
     """
     Selección por Ruleta.
@@ -27,9 +24,6 @@ def torneo(datos_poblacion, num_seleccionados, k=3):
     return seleccionados
 
 
-# ==========================================
-# MÉTODOS AVANZADOS (DEL DOCUMENTO LATEX)
-# ==========================================
 def torneo_umbral(datos_poblacion, num_seleccionados, umbral=0.75):
     """
     Selección por torneo con umbral.

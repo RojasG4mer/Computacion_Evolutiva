@@ -12,6 +12,7 @@ def capturar_imagen_webcam():
     if not cap.isOpened():
         print("Error: No se pudo establecer conexión con la cámara web.")
         return None
+    
 
     print("\n" + "="*30)
     print(" CÁMARA INICIADA (VISTA EN VIVO)")
@@ -37,14 +38,14 @@ def capturar_imagen_webcam():
     return frame_capturado
 
 # ==========================================
-# 1. INICIALIZACIÓN DE VARIABLES GLOBALES
+# VARIABLES GLOBALES
 # ==========================================
 obj_points = None
 img_points_target = None
 img_shape = None
 
-# Límite genético para los 8 parámetros INTRÍNSECOS
-# (Se ajustarán al tamaño de tu foto más abajo)
+# Límite genético para los 8 parámetros INTRÍNSECOS para que no haya numeros que sean muy poco probables
+# o que sean muy exgerados
 BOUNDS = [
     (500, 1100), (500, 1100),    # fx, fy
     (160, 480), (120, 360),      # cx, cy
@@ -56,10 +57,6 @@ def decodificar_cromosoma_real(individuo_normalizado):
     return [low + gen * (high - low) for gen, (low, high) in zip(individuo_normalizado, BOUNDS)]
 
 def evaluar_aptitud_cv(individuo_normalizado):
-    """
-    El AG solo optimiza los 8 parámetros INTRÍNSECOS.
-    OpenCV calcula la posición extrínseca perfecta (solvePnP) para evaluar el error.
-    """
     params = decodificar_cromosoma_real(individuo_normalizado)
     fx, fy, cx, cy, k1, k2, p1, p2 = params
     
@@ -75,13 +72,15 @@ def evaluar_aptitud_cv(individuo_normalizado):
         proj_points = proj_points.reshape(-1, 2)
         
         mse = np.mean(np.linalg.norm(img_points_target - proj_points, axis=1))
+        # Aptitud, entre más pequeño el error, mayor la aptitud
+        # Le agrego un pequeño valor para evitar división por cero.
         aptitud = 1.0 / (mse + 1e-6)
         return aptitud, proj_points, mse
     except:
         return 1e-6, np.zeros_like(img_points_target), 9999.0
 
 # ==========================================
-# 2. CAPTURA DE IMAGEN Y DETECCIÓN REAL (OPENCV 4.8+)
+# CAPTURAMOS LA IMAGEN Y OPENCV DETECTA LOS BORDES Y LOS VALORES DE CHARUCO
 # ==========================================
 imagen_real = capturar_imagen_webcam()
 if imagen_real is None:
@@ -90,10 +89,10 @@ if imagen_real is None:
 
 print("Detectando esquinas ChArUco reales...")
 
-# --- CONFIGURACIÓN DE TU TABLETA ---
+# --- CONFIGURACIÓN DE LA TABLETA SAMSUNG 
 cuadros_x, cuadros_y = 5, 7       
-tamano_cuadro = 0.04              
-tamano_marcador = 0.02            
+tamano_cuadro = 0.04  #cm        
+tamano_marcador = 0.02 #cm         
 
 diccionario = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
 tablero = cv2.aruco.CharucoBoard((cuadros_x, cuadros_y), tamano_cuadro, tamano_marcador, diccionario)
@@ -101,20 +100,20 @@ tablero = cv2.aruco.CharucoBoard((cuadros_x, cuadros_y), tamano_cuadro, tamano_m
 gray = cv2.cvtColor(imagen_real, cv2.COLOR_BGR2GRAY)
 img_shape = gray.shape
 
-# --- SOLUCIÓN PARA EL ERROR DE VERSIÓN: Usar CharucoDetector ---
 charuco_detector = cv2.aruco.CharucoDetector(tablero)
 charuco_corners, charuco_ids, _, _ = charuco_detector.detectBoard(gray)
 
 if charuco_corners is not None and len(charuco_corners) > 3:
     print(f"¡Éxito! Se detectaron {len(charuco_corners)} puntos reales en la foto.")
     
-    # 1. Obtenemos los puntos 3D de la tableta (Z=0)
+    # Obtenemos los puntos 3D de la tableta (Z=0)
     obj_points = tablero.getChessboardCorners()[charuco_ids.flatten()]
     
-    # 2. Obtenemos los puntos 2D (píxeles) detectados en la foto
+    # Obtenemos los puntos 2D (píxeles) detectados en la foto
     img_points_target = charuco_corners.reshape(-1, 2)
     
-    # 3. Ajustamos los límites de la cámara al tamaño de tu fotografía
+    # Ajustamos los límites de la cámara al tamaño de la fotografía para aproximar 
+    # donde van a estar los parametros extrínsecos y evitar que tomen valores muy alejados de la realidad
     alto, ancho = img_shape
     BOUNDS[0] = (ancho * 0.5, ancho * 2.0) # fx
     BOUNDS[1] = (ancho * 0.5, ancho * 2.0) # fy
@@ -127,15 +126,16 @@ else:
     exit()
 
 # ==========================================
-# 3. CICLO EVOLUTIVO PASO A PASO
+# ALGORITMO GENETICO PARA CALIBRAR LA CAMARA
 # ==========================================
 POP_SIZE = 100
-GENERATIONS = 1500   
+GENERATIONS = 20
 PROB_MUTACION = 0.2
 PASO_REPORTE = max(1, GENERATIONS // 10) 
 
 print("\nInicializando Población (8 Parámetros Intrínsecos)...")
-# El cromosoma ahora tiene 8 genes (quitamos rotación/traslación porque solvePnP lo hace por nosotros)
+# El cromosoma tiene 8 genes (parámetros intrínsecos) 
+# y quitamos rotación/traslación porque solvePnP lo hace por defecto
 poblacion = [[np.random.rand() for _ in range(8)] for _ in range(POP_SIZE)]
 historial_reporte = []
 
@@ -188,7 +188,7 @@ for gen in range(GENERATIONS):
     poblacion = siguiente_generacion
 
 # ==========================================
-# 4. GENERACIÓN DE REPORTE PDF FINAL
+# GENERACIÓN DE REPORTE PDF FINAL
 # ==========================================
 print("\nGenerando Reporte PDF de Calibración...")
 nombre_pdf = "Reporte_Calibracion_Metrologia.pdf"

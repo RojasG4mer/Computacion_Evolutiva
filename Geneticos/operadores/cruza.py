@@ -1,13 +1,7 @@
 import random
 import math
 
-# ==========================================
-# MÉTODOS ORIGINALES
-# ==========================================
 def un_punto(in1, in2, n_bits):
-    """
-    Cruza tradicional de un solo punto.
-    """
     hijo1, hijo2 = in1.copy(), in2.copy()
     punto = random.randint(1, n_bits - 1)
     
@@ -28,14 +22,8 @@ def uniforme(in1, in2, n_bits):
             hijo1.append(b2); hijo2.append(b1)
     return hijo1, hijo2
 
-
-# ==========================================
-# MÉTODOS AVANZADOS (DEL DOCUMENTO LATEX)
-# ==========================================
 def cruza_n_puntos(in1, in2, n_bits, n_puntos=2):
-    """
-    Cruza de n puntos. Minimiza efectos disruptivos (usualmente n=2).
-    """
+
     h1, h2 = in1.copy(), in2.copy()
     # Aseguramos no pedir más puntos de cruza que la longitud del cromosoma
     n_puntos = min(n_puntos, n_bits - 1)

@@ -58,6 +58,7 @@ class AlgoritmoGenetico:
             datos_ordenados = sorted(datos, key=lambda x: x['aptitud'], reverse=True)
             self.historial_completo.append(datos_ordenados)
             mejor_gen = datos_ordenados[0]
+            
             if mejor_global is None or mejor_gen['aptitud'] > mejor_global['aptitud']:
                 mejor_global = mejor_gen
                 
@@ -66,7 +67,10 @@ class AlgoritmoGenetico:
             self._log("\n2. Selección:") 
             for p in padres: self._log(f"   {p['bits']}") 
             
-            siguiente_generacion = []
+            # rECUERDA Al elite, sino luego no converge
+            elite = mejor_gen['bits'].copy()
+            siguiente_generacion = [elite] 
+            
             self._log("\n3. Cruza:") 
             for i in range(num_padres):
                 p1, p2 = padres[i]['bits'].copy(), padres[i+1]['bits'].copy() if (i+1) < num_padres else padres[0]['bits'].copy() 
@@ -74,8 +78,13 @@ class AlgoritmoGenetico:
                 siguiente_generacion.extend([hijo1, hijo2]) 
                 self._log(f"   Cruzando {p1} y {p2} -> Hijos: {hijo1}, {hijo2}") 
                 
+            # Recortamos la población al tamaño original (por haber agregado al élite extra)
+            siguiente_generacion = siguiente_generacion[:self.tamano_poblacion]
+                
             self._log("\n4. Mutación:") 
-            for i in range(len(siguiente_generacion)):
+
+
+            for i in range(1, len(siguiente_generacion)):
                 if random.random() < self.prob_mutacion: 
                     antes = siguiente_generacion[i].copy() 
                     siguiente_generacion[i] = self.mutar(siguiente_generacion[i]) 

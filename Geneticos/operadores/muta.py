@@ -51,9 +51,6 @@ def mutacion_inversion_secuencia(individuo):
     individuo[punto1:punto2] = reversed(individuo[punto1:punto2])
     return individuo
 
-# ==========================================
-# MUTACIÓN PARA VECTORES REALES
-# ==========================================
 def mutacion_gaussiana(individuo, media=0.0, desviacion=0.1):
     """
     Mutación ideal si estás usando codificación real (no binaria).

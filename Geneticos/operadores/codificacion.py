@@ -1,17 +1,17 @@
 import math
 
 # ==========================================
-# CÁLCULO DE PRECISIÓN (De la diapositiva)
+# Decodificación de bits por precisión
 # ==========================================
 def calcular_bits_por_precision(u, v, P_precision):
     """
     Calcula la longitud L de la subcadena basándose en la precisión deseada.
-    Fórmula de la diapositiva: L = log2( ((v - u) / P_precision) + 1 )
+    Fórmula: L = log2( ((v - u) / P_precision) + 1 )
     """
     return math.ceil(math.log2(((v - u) / P_precision) + 1))
 
 # ==========================================
-# DECODIFICACIÓN ESTÁNDAR 1D
+# DECODIFICACIÓN NORMAL 
 # ==========================================
 def decodificar_variable(subcadena_bits, u, v):
     """

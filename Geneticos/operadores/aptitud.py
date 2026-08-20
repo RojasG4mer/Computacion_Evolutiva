@@ -1,33 +1,6 @@
 import math
 import random
 
-# ==========================================
-# FUNCIONES ORIGINALES
-# ==========================================
-def funcion_polinomial(x):
-    """
-    Función de aptitud original del algoritmo.
-    """
-    return -x**3 + 60*x**2 + 15000
-
-def funcion_cauchy(x):
-    """
-    Función para el algoritmo de Cauchy.
-    """
-    # Ejemplo de estructura (debes poner tu fórmula real si es diferente):
-    return 1 / (math.pi * (1 + x**2)) 
-
-def funcion_lineal(x):
-    """
-    Función lineal para el análisis de zonas y líneas de intersección.
-    """
-    # Ejemplo de estructura lineal básica:
-    return x 
-
-import math
-import random
-
-# Funciones 1D originales (Se mantienen por compatibilidad)
 def funcion_polinomial(x): return -x**3 + 60*x**2 + 15000
 def funcion_cauchy(x): return 1 / (math.pi * (1 + x**2)) 
 def funcion_lineal(x): return x 
@@ -37,7 +10,7 @@ def funcion_lineal(x): return x
 # ==========================================
 def de_jong_1_esfera(valores):
     x, y = valores
-    return x**2 + y**2
+    return (x**2 + y**2)
 
 def de_jong_3_escalon(valores):
     x, y = valores
